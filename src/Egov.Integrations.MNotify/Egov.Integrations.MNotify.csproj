@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <!-- NuGet Metadata -->
+    <PackageId>Egov.Integrations.MNotify</PackageId>
+    <Authors>egov.md</Authors>
+    <Company>egov.md</Company>
+    <Description>A .NET client library for integrating with the MNotify service.</Description>
+    <PackageTags>egov;mnotify;integration;notifications;dotnet</PackageTags>
+    <RepositoryUrl>https://github.com/egov-moldova/Egov.Integrations.MNotify</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+    <!-- Build settings -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" Condition="Exists('..\..\README.md')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Egov.Extensions.Configuration" Version="10.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+        <InternalsVisibleTo Include="$(AssemblyName).Extended" />
+        <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+    </ItemGroup>
+
+</Project>

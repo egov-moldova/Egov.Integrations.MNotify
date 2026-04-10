@@ -1,0 +1,81 @@
+name: '10.0$(Rev:.r)'
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+
+stages:
+- stage: Build
+  displayName: Build NuGet packages
+  jobs:
+  - job: BuildPackage
+    displayName: Build NuGet packages
+    pool:
+      name: Azure Pipelines
+      vmImage: ubuntu-latest
+    workspace:
+      clean: all
+    variables:
+      solutionPath: src
+      projectPath: $(solutionPath)/Age.Integrations.MNotify/Age.Integrations.MNotify.csproj
+      extendedProjectPath: $(solutionPath)/Age.Integrations.MNotify.Extended/Age.Integrations.MNotify.Extended.csproj
+      buildConfiguration: Release
+    steps:
+    - task: UseDotNet@2
+      displayName: Use .NET Core SDK
+      inputs:
+        version: 10.0.x
+    - task: VersionDotNetCoreAssemblies@3
+      displayName: Version Projects
+      inputs:
+        Path: '$(solutionPath)'
+        VersionNumber: '$(Build.BuildNumber).0'
+        AddDefault: true
+    - task: DotNetCoreCLI@2
+      displayName: Restore NuGet
+      inputs:
+        command: restore
+        verbosityRestore: Minimal
+        feedsToUse: select
+        includeNuGetOrg: true
+        feedRestore: Framework
+        projects: |
+          $(projectPath)
+          $(extendedProjectPath) 
+    - script: dotnet build --no-restore --configuration $(buildConfiguration) "$(projectPath)"
+      displayName: Build Base Project
+    - script: dotnet pack --no-build --include-symbols --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory) "$(projectPath)"
+      displayName: Pack Base NuGet
+    - script: dotnet build --no-restore --configuration $(buildConfiguration) "$(extendedProjectPath)"
+      displayName: Build Extended Project
+    - script: dotnet pack --no-build --include-symbols --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory) "$(extendedProjectPath)"
+      displayName: Pack Extended NuGet
+    - publish: $(Build.ArtifactStagingDirectory)
+      artifact: packages
+
+- stage: AzureArtifacts
+  displayName: Publish to Azure Artifacts
+  dependsOn: Build
+  jobs:
+  - deployment: AzureArtifacts
+    displayName: Azure Artifacts
+    pool:
+      name: Azure Pipelines
+      vmImage: ubuntu-latest
+    environment: Azure Artifacts
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: UseDotNet@2
+            displayName: Use .NET Core SDK
+            inputs:
+              version: 10.0.x
+          - task: DotNetCoreCLI@2
+            displayName: Push NuGet
+            inputs:
+              command: push
+              packagesToPush: '$(Pipeline.Workspace)/packages/*.nupkg;!$(Pipeline.Workspace)/packages/*.symbols.nupkg'
+              publishVstsFeed: '7638c1b5-7842-4073-8e64-8d0f5e11f2a7'
