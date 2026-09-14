@@ -1,6 +1,7 @@
 ﻿# Egov.Integrations.MNotify
 
 [![NuGet](https://img.shields.io/nuget/v/Egov.Integrations.MNotify.svg)](https://www.nuget.org/packages/Egov.Integrations.MNotify)
+[![NuGet Extended](https://img.shields.io/nuget/v/Egov.Integrations.MNotify.Extended.svg?label=nuget%20%7C%20Extended)](https://www.nuget.org/packages/Egov.Integrations.MNotify.Extended)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A .NET library for integrating with the MNotify service. It provides a client to send localized notifications (Email, SMS, Push, etc.), check their status, and manage notification templates. It is designed to be used in services built on the eGov platform and leverages `Egov.Extensions.Configuration` for secure certificate-based authentication (mTLS).
@@ -12,6 +13,7 @@ A .NET library for integrating with the MNotify service. It provides a client to
 - [Features](#features)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
+- [Packages](#packages)
 - [Configuration](#configuration)
 - [Usage](#usage)
   - [Dependency Injection (Recommended)](#dependency-injection-recommended)
@@ -61,6 +63,19 @@ Or via the Package Manager Console:
 ```shell
 Install-Package Egov.Integrations.MNotify
 ```
+
+---
+
+## Packages
+
+This repository builds two packages, released together under the same version:
+
+| Package | Contents |
+|---------|----------|
+| [`Egov.Integrations.MNotify`](https://www.nuget.org/packages/Egov.Integrations.MNotify) | `IMNotifyClient` — sending notifications, checking status, managing templates. |
+| [`Egov.Integrations.MNotify.Extended`](https://www.nuget.org/packages/Egov.Integrations.MNotify.Extended) | `IMNotifyExtendedClient : IMNotifyClient` — everything above, plus the recipient-facing API: message inbox, read state, contacts and language preference. See [its README](src/Egov.Integrations.MNotify.Extended/README.md). |
+
+Install the Extended package instead of (not alongside) the base one if you need the recipient API — it brings the base package in as a dependency.
 
 ---
 
