@@ -6,6 +6,7 @@ on:
 env:
   DOTNET_VERSION: '10.0.x'
   PROJECT_PATH: 'src/Egov.Integrations.MNotify/Egov.Integrations.MNotify.csproj'
+  EXTENDED_PROJECT_PATH: 'src/Egov.Integrations.MNotify.Extended/Egov.Integrations.MNotify.Extended.csproj'
   SOLUTION_PATH: 'src/Egov.Integrations.MNotify.sln'
 
 jobs:
@@ -53,38 +54,17 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Set Version and Update Project (Local Only)
+      - name: Set Version
         id: versioning
-        shell: pwsh
+        shell: bash
         run: |
-          # Use run_number to create version 10.0.X
-          $version = "10.0.${{ github.run_number }}"
-          echo "NEW_VERSION=$version" >> $env:GITHUB_OUTPUT
-          
-          # Robust XML Update (Only local to the build runner)
-          [xml]$csproj = Get-Content "${{ env.PROJECT_PATH }}"
-          
-          # Find the first PropertyGroup
-          $pg = $csproj.Project.PropertyGroup | Select-Object -First 1
-          
-          if ($null -eq $pg) {
-              $pg = $csproj.CreateElement("PropertyGroup")
-              $csproj.Project.AppendChild($pg)
-          }
-
-          if ($null -ne $pg.Version) {
-              $pg.Version = $version
-          } else {
-              $vNode = $csproj.CreateElement("Version")
-              $vNode.InnerText = $version
-              $pg.AppendChild($vNode)
-          }
-          
-          $csproj.Save("${{ env.PROJECT_PATH }}")
-          echo "Updated version to $version in ${{ env.PROJECT_PATH }} (locally only)"
+          # Both packages are versioned together as 10.0.<run_number>.
+          echo "NEW_VERSION=10.0.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
 
       - name: Pack
-        run: dotnet pack ${{ env.PROJECT_PATH }} --configuration Release --output ./nupkg /p:Version=${{ steps.versioning.outputs.NEW_VERSION }}
+        run: |
+          dotnet pack ${{ env.PROJECT_PATH }} --configuration Release --output ./nupkg /p:Version=${{ steps.versioning.outputs.NEW_VERSION }}
+          dotnet pack ${{ env.EXTENDED_PROJECT_PATH }} --configuration Release --output ./nupkg /p:Version=${{ steps.versioning.outputs.NEW_VERSION }}
 
       - name: Push to NuGet.org
         run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

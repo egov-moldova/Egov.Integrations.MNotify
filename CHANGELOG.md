@@ -12,4 +12,14 @@ see the commit history for those.
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+
+- `Egov.Integrations.MNotify.Extended` package, migrated from Azure DevOps into this
+  repository. It adds `IMNotifyExtendedClient`, which derives from `IMNotifyClient` and
+  covers the recipient-facing MNotify API: message inbox with pagination summary, per-message
+  and bulk read state, recipient contacts, and notification language. Register it with
+  `services.AddMNotifyExtendedClient(...)` in place of `AddMNotifyClient`.
+
+### Changed
+
+- The publish workflow now packs and pushes both packages, versioned together.
